@@ -1,0 +1,1244 @@
+
+/*
+
+
+That is tha Notepad is which is made in Java Swing 
+MyClass Is The Class 
+
+
+In this programming execution We Require a some file 
+which is provided by the Java means that JDK.....
+
+*/
+
+
+
+
+
+
+
+
+import java.io.*;
+import java.awt.event.*;
+import java.util.*;
+import java.awt.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.JOptionPane;
+import javax.swing.undo.UndoManager;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.plaf.metal.*;
+import javax.swing.text.Document;
+
+public class MyClass extends JFrame
+{
+	private JTextArea textArea;
+	JList toollistFont;
+	static int i=0;
+	private JFileChooser fileDialog,saveFile;
+	String filename;
+	private Font selectedFont;
+	private int pos=0;
+	private UndoManager undoManager=new UndoManager();
+	
+	// It Is For The Find Class
+	
+	public JTextArea getTextArea()
+	{
+		return textArea;
+	}
+	
+	public MyClass()
+	{
+		
+		UIManager.addPropertyChangeListener(new UISwitchListener((JComponent)getRootPane()));
+		
+		addWindowListener(new WindowAdapter()
+		{
+			public void windowClosing(WindowEvent event)
+			{
+				exitApplication();
+			}
+		});
+			
+		textArea=new JTextArea();
+		JScrollPane panel1=new JScrollPane(textArea);
+		
+		textArea.getDocument().addUndoableEditListener(
+		new UndoableEditListener()
+		{
+			public void undoableEditHappened(UndoableEditEvent u)
+			{
+				undoManager.addEdit(u.getEdit());
+			}
+		}	
+		);
+		
+		textArea.addMouseListener(mouseListener);
+		add(panel1);
+		setBounds(0,0,700,700);
+		
+		setTitle("Notepad");
+		
+		JMenuBar menu=new JMenuBar();
+		ImageIcon iconNew=new ImageIcon("123.gif");
+		ImageIcon iconOpen=new ImageIcon("open.gif");
+		ImageIcon iconSave=new ImageIcon("save.gif");
+		
+		ImageIcon iconUndo=new ImageIcon("undo1.gif");
+		ImageIcon iconRedo=new ImageIcon("redo.ico");
+		ImageIcon iconCut=new ImageIcon("cut.gif");
+		ImageIcon iconCopy=new ImageIcon("copy.gif");
+		ImageIcon iconPaste=new ImageIcon("paste.gif");
+		ImageIcon icon=new ImageIcon("123.jpg");
+		ImageIcon iconLeft=new ImageIcon("left.gif");
+		ImageIcon iconCenter=new ImageIcon("center.gif");
+		ImageIcon iconRight=new ImageIcon("right.gif");
+		
+		
+		JMenu file=new JMenu("File");
+		file.setMnemonic(KeyEvent.VK_F);
+		
+		JMenu imports =new JMenu("Import");
+		imports.setMnemonic(KeyEvent.VK_I);
+		
+		JMenuItem newsf=new JMenuItem("Import Newsfeed Lead");
+		JMenuItem bookm=new JMenuItem("Import Bookmark");
+		JMenuItem mail=new JMenuItem("Import Mail");
+		
+		imports.add(newsf);
+		imports.add(bookm);
+		imports.add(mail);
+		
+		JMenuItem fileNew = new JMenuItem("New ",iconNew);
+		fileNew.setMnemonic(KeyEvent.VK_N);
+		fileNew.setAccelerator(KeyStroke.getKeyStroke('N',KeyEvent.CTRL_DOWN_MASK));
+		
+		fileNew.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.setText("");
+			}
+		});
+		
+		JMenuItem fileOpen = new JMenuItem("open " , iconOpen);
+		fileOpen.setMnemonic(KeyEvent.VK_O);
+		fileOpen.setAccelerator(KeyStroke.getKeyStroke('O',KeyEvent.CTRL_DOWN_MASK));
+		
+		fileOpen.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				fileDialog=new JFileChooser();
+				int openChoise= fileDialog.showOpenDialog(MyClass.this);
+				
+				if(openChoise != JFileChooser.APPROVE_OPTION)
+					return;
+					
+				File f=fileDialog.getSelectedFile();
+				if(f.isFile() && f.canRead())
+				{
+					textArea.setText("");
+					setTitle(f.getName());
+					
+					try
+					{
+						BufferedReader br=new BufferedReader(new FileReader(f));
+						String str;
+						
+						while((str=br.readLine())!=null)
+						{
+							textArea.append(str + "\n");
+						}
+					}
+					catch(Exception exp)
+					{
+						textArea.append("File Bot Found");
+					}
+				}
+				
+			}
+			
+		});
+		
+		JMenuItem fileSave = new JMenuItem("Save" , iconSave);
+		fileSave.setMnemonic(KeyEvent.VK_S);
+		fileSave.setAccelerator(KeyStroke.getKeyStroke('S',KeyEvent.CTRL_DOWN_MASK));
+		
+		fileSave.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				saveFile();
+			}
+		});
+		
+		JMenuItem fileClose=new JMenuItem("Close");
+		fileClose.setMnemonic(KeyEvent.VK_C);
+		
+		fileClose.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				exitApplication();
+			}
+		});
+		
+		fileClose.setToolTipText("Exit Application");
+		fileNew.setToolTipText("Create A New File");
+		fileOpen.setToolTipText("Open The File");
+		fileSave.setToolTipText("Save The File");
+		
+		
+		JMenu edit=new JMenu("Edit");
+		edit.setMnemonic(KeyEvent.VK_E);
+		
+			
+		JMenuItem editUndo= new JMenuItem("Undo",iconUndo);
+		editUndo.setAccelerator(KeyStroke.getKeyStroke('Z',KeyEvent.CTRL_DOWN_MASK));
+		
+		editUndo.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				try
+				{
+					undoManager.undo();
+				}
+				catch(Exception exe)
+				{}
+			}
+		});
+			
+		JMenuItem editRedo = new JMenuItem("Redo" , iconRedo);
+		editRedo.setAccelerator(KeyStroke.getKeyStroke('Y',KeyEvent.CTRL_DOWN_MASK));
+		
+		editRedo.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				try
+				{
+					undoManager.redo();
+				}
+				catch(Exception exe)
+				{}
+			}
+		});
+		
+		JMenuItem editCut= new JMenuItem("Cut",iconCut);
+		editCut.setMnemonic(KeyEvent.VK_C);
+		editCut.setAccelerator(KeyStroke.getKeyStroke('X',KeyEvent.CTRL_DOWN_MASK));
+		
+		editCut.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.cut();
+			}
+		});
+		
+		
+		JMenuItem editCopy = new JMenuItem("Copy" , iconCopy);
+		editCopy.setMnemonic(KeyEvent.VK_C);
+		editCopy.setAccelerator(KeyStroke.getKeyStroke('C',KeyEvent.CTRL_DOWN_MASK));
+		
+		editCopy.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.copy();
+			}
+		});
+		
+		JMenuItem editPaste = new JMenuItem("Paste" , iconPaste);
+		editPaste.setMnemonic(KeyEvent.VK_P);
+		editPaste.setAccelerator(KeyStroke.getKeyStroke('V',KeyEvent.CTRL_DOWN_MASK));
+		
+		
+		editPaste.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.paste();
+			}
+		});
+		
+		JMenuItem editFind= new JMenuItem("Find" , icon);
+		editFind.setMnemonic(KeyEvent.VK_D);
+		editFind.setAccelerator(KeyStroke.getKeyStroke('F',KeyEvent.CTRL_DOWN_MASK));
+		
+		editFind.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Find f=new Find(MyClass.this);
+				//createNewFrame();
+			}
+		});
+		
+		JMenuItem editReplace=new JMenuItem("Replace" , icon);
+		fileClose.setMnemonic(KeyEvent.VK_R);
+		
+		JMenuItem editSelectAll= new JMenuItem("SelectAll",iconCut);
+		editSelectAll.setMnemonic(KeyEvent.VK_A);
+		editSelectAll.setAccelerator(KeyStroke.getKeyStroke('A',KeyEvent.CTRL_DOWN_MASK));
+		
+		editPaste.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.selectAll();
+			}
+		});
+		
+		editUndo.setToolTipText("Undo The Text");
+		editRedo.setToolTipText("Redo The Text");
+		editCut.setToolTipText("Cut The Text");
+		editCopy.setToolTipText("Copy The Text");
+		editPaste.setToolTipText("Paste  The Text");		
+		editFind.setToolTipText("Find The Text");
+		editReplace.setToolTipText("Replace The Text");
+		
+		fileClose.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,ActionEvent.CTRL_MASK));
+		
+		JMenu font=new JMenu("Foramt");
+		font.setMnemonic(KeyEvent.VK_O);
+		JMenuItem fontDialog=new JMenuItem("Font..");
+		fontDialog.setAccelerator(KeyStroke.getKeyStroke('F',KeyEvent.CTRL_DOWN_MASK));
+		
+		final JCheckBoxMenuItem fontWordwrap=new JCheckBoxMenuItem("Wordwrap");
+		
+		fontWordwrap.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				if(fontWordwrap.getState()==true)
+					textArea.setLineWrap(true);
+				else
+					textArea.setLineWrap(false);
+			}
+		});
+		
+		fontDialog.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent ae)
+		{
+				final JFrame frame=new JFrame("Font");
+				frame.setLayout(null);
+				String availableFont[]=GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+				final JList listFont=new JList(availableFont);
+				JLabel fontLabel=new JLabel("Font");
+				final JTextField valueFont=new JTextField("Arial");
+				JScrollPane fontPane=new JScrollPane(listFont);
+				String fontStyle[]={"Normal","Bold","Italic","Bold Italic"};
+				final JList styleList=new JList(fontStyle);
+				JLabel styleLabel=new JLabel("Style");
+				
+				int v=ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
+				int h=ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS;
+				
+				JScrollPane stylePane=new JScrollPane(styleList,v,h);
+				final JTextField valueStyle=new JTextField("Normal");
+				String fontSize[]={"8","10","12","14","16","18","20","22","24","28","32","64"};
+				final JList sizeList=new JList(fontSize);
+				JLabel sizeLabel=new JLabel("fontSize");
+				JScrollPane sizePane=new JScrollPane(sizeList);
+				final JTextField valueSize=new JTextField("12");
+				
+				JButton okButton=new JButton("OK");
+				JButton cancelButton=new JButton("CANCEL");
+				JLabel sampleLabel=new JLabel("SAMPLE :");
+				final JTextField sample=new JTextField("GAURAV");
+				
+				frame.setSize(500,300);
+				frame.setVisible(true);
+				
+				fontLabel.setBounds(10,10,170,20);
+				valueFont.setBounds(10,35,170,20);
+				fontPane.setBounds(10,60,170,150);
+				
+				styleLabel.setBounds(200,10,100,20);
+				valueStyle.setBounds(200,35,100,20);
+				stylePane.setBounds(200,60,100,150);
+				
+				sizeLabel.setBounds(320,10,50,20);
+				valueSize.setBounds(320,35,50,20);
+				sizePane.setBounds(320,60,50,150);
+				
+				okButton.setBounds(400,35,80,20);
+				cancelButton.setBounds(400,60,80,20);
+				
+				sampleLabel.setBounds(150,235,100,30);
+				sample.setBounds(200,235,100,30);
+				
+				listFont.addListSelectionListener(new ListSelectionListener()
+				{
+					public void valueChanged(ListSelectionEvent event)
+					{
+							valueFont.setText(listFont.getSelectedValue().toString());
+							selectedFont=new Font(valueFont.getText(),styleList.getSelectedIndex(),Integer.parseInt(valueSize.getText()));
+							sample.setFont(selectedFont);
+					}
+				});
+				
+				styleList.addListSelectionListener(new ListSelectionListener()
+				{
+					public void valueChanged(ListSelectionEvent event)
+					{
+						if(!event.getValueIsAdjusting())
+						{
+							valueStyle.setText(styleList.getSelectedValue().toString());
+							selectedFont=new Font(valueFont.getText(),styleList.getSelectedIndex(),Integer.parseInt(valueSize.getText()));
+							sample.setFont(selectedFont);
+						}
+					}
+				});
+				
+				sizeList.addListSelectionListener(new ListSelectionListener()
+				{
+					public void valueChanged(ListSelectionEvent event)
+					{
+						if(!event.getValueIsAdjusting())
+						{
+							valueSize.setText(sizeList.getSelectedValue().toString());
+							selectedFont=new Font(valueFont.getText(),sizeList.getSelectedIndex(),Integer.parseInt(valueSize.getText()));
+							sample.setFont(selectedFont);
+						}
+					}
+				});
+				
+				frame.add(fontLabel);
+				frame.add(valueFont);
+				frame.add(fontPane);
+				frame.add(styleLabel);
+				frame.add(stylePane);
+				frame.add(valueStyle);
+				frame.add(sizeLabel);
+				frame.add(sizePane);
+				frame.add(valueSize);
+				frame.add(okButton);
+				
+				okButton.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						selectedFont=new Font(valueFont.getText(),styleList.getSelectedIndex(),Integer.parseInt(valueSize.getText()));
+						textArea.setFont(selectedFont);
+						frame.setVisible(false);
+					}
+				});
+				
+				cancelButton.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						frame.setVisible(false);
+					}
+				});
+				
+				frame.add(cancelButton);
+				frame.add(sampleLabel);
+				frame.add(sample);
+		}
+		});
+		
+		JMenu LookAndFeelStyle=new JMenu("Style");
+		LookAndFeelStyle.setMnemonic(KeyEvent.VK_S);
+		ButtonGroup group=new ButtonGroup();
+		
+		JRadioButtonMenuItem styleMetal=new JRadioButtonMenuItem("Metal");
+		group.add(styleMetal);
+		
+		styleMetal.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				try
+				{
+					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				}
+				catch(Exception exe){System.out.println(exe);}
+			}
+		}
+		);
+		
+		JRadioButtonMenuItem styleMotif=new JRadioButtonMenuItem("Motif");
+		group.add(styleMotif);
+		
+		styleMotif.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				try
+				{
+					UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+				}
+				catch(Exception exe){System.out.println(exe);}
+			}
+		}
+		);
+		
+		JRadioButtonMenuItem styleNimbus=new JRadioButtonMenuItem("Nimbus");
+		group.add(styleNimbus);
+		
+		styleNimbus.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				try
+				{
+					UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+				}
+				catch(Exception exe){System.out.println(exe);}
+			}
+		}
+		);
+		
+		JRadioButtonMenuItem styleWindows=new JRadioButtonMenuItem("Windows");
+		group.add(styleWindows);
+		
+		styleWindows.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				try
+				{
+
+					UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+				}
+				catch(Exception exe){System.out.println(exe);}
+			}
+		}
+		);		
+		
+		JMenu colorText=new JMenu("Color");
+		colorText.setMnemonic(KeyEvent.VK_C);
+		
+		JMenu textColorChange =new JMenu("Change Textcolor");
+		ButtonGroup groupColor=new ButtonGroup();
+		
+		JRadioButtonMenuItem redColor=new JRadioButtonMenuItem("Red");
+		group.add(redColor);
+
+
+		JRadioButtonMenuItem yellowColor=new JRadioButtonMenuItem("Gray");
+		group.add(yellowColor);
+		
+		JMenuItem custom=new JMenuItem("Custom Background..");
+		JMenuItem custom1=new JMenuItem("Custom TextColor..");
+		
+		custom.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				JColorChooser j=new JColorChooser();
+				Color c=j.showDialog(MyClass.this,"Color",Color.WHITE);
+				textArea.setBackground(c);
+			}
+		});
+		
+		custom1.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				JColorChooser j=new JColorChooser();
+				Color c=j.showDialog(MyClass.this,"Color",Color.WHITE);
+				textArea.setForeground(c);
+			}
+		});
+		
+		yellowColor.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				try
+				{
+					textArea.setForeground(new Color(192, 192, 192));
+				}
+				catch(Exception exe){System.out.println(exe);}
+			}
+		}
+		);
+		
+		redColor.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				try
+				{
+					textArea.setForeground(Color.RED);
+				}
+				catch(Exception exe){System.out.println(exe);}
+			}
+		}
+		);
+		
+		JRadioButtonMenuItem blueColor=new JRadioButtonMenuItem("Blue");
+		group.add(blueColor);
+		
+		blueColor.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				try
+				{
+					textArea.setForeground(Color.BLUE);
+				}
+				catch(Exception exe){System.out.println(exe);}
+			}
+		}
+		);
+		
+		JMenu theams=new JMenu("Theam");
+		theams.setMnemonic(KeyEvent.VK_T);
+		
+		ButtonGroup group3=new ButtonGroup();
+		JRadioButtonMenuItem theam1=new JRadioButtonMenuItem("KhakhiTheam");
+		JRadioButtonMenuItem theam2=new JRadioButtonMenuItem("AquaMetalTheme");
+		JRadioButtonMenuItem theam3=new JRadioButtonMenuItem("BigContrastMetalTheme");
+		JRadioButtonMenuItem theam4=new JRadioButtonMenuItem("DemoMetalTheme");
+		JRadioButtonMenuItem theam5=new JRadioButtonMenuItem("ContrastMetalTheme");
+		JRadioButtonMenuItem theam6=new JRadioButtonMenuItem("GreenMetalTheme");
+		JRadioButtonMenuItem theam7=new JRadioButtonMenuItem("CharcoalTheme");
+		JRadioButtonMenuItem theam8=new JRadioButtonMenuItem("EmeraldTheme");
+		JRadioButtonMenuItem theam9=new JRadioButtonMenuItem("RubyTheme");
+		
+		group3.add(theam1);
+		group3.add(theam2);
+		group3.add(theam3);
+		group3.add(theam4);
+		group3.add(theam5);
+		group3.add(theam6);
+		group3.add(theam7);
+		group3.add(theam8);
+		group3.add(theam9);
+		
+		
+		theam9.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				MetalTheme mt=new RubyTheme();
+				MetalLookAndFeel.setCurrentTheme(mt);
+				
+				try
+				{
+					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				}
+				catch(Exception e)
+				{
+				}
+			}
+		});
+		
+		theam8.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				MetalTheme mt=new EmeraldTheme();
+				MetalLookAndFeel.setCurrentTheme(mt);
+				
+				try
+				{
+					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				}
+				catch(Exception e)
+				{
+				}
+			}
+		});
+		
+		
+		theam7.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				MetalTheme mt=new CharcoalTheme();
+				MetalLookAndFeel.setCurrentTheme(mt);
+				
+				try
+				{
+					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				}
+				catch(Exception e)
+				{
+				}
+			}
+		});
+		
+		
+		theam6.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				MetalTheme mt=new GreenMetalTheme();
+				MetalLookAndFeel.setCurrentTheme(mt);
+				
+				try
+				{
+					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				}
+				catch(Exception e)
+				{
+				}
+			}
+		});
+		
+		
+		theam5.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				MetalTheme mt=new ContrastMetalTheme();
+				MetalLookAndFeel.setCurrentTheme(mt);
+				
+				try
+				{
+					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				}
+				catch(Exception e)
+				{
+				}
+			}
+		});
+		
+		
+		theam4.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				MetalTheme mt=new DemoMetalTheme();
+				MetalLookAndFeel.setCurrentTheme(mt);
+				
+				try
+				{
+					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				}
+				catch(Exception e)
+				{
+				}
+			}
+		});
+		
+		theam3.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				MetalTheme mt=new BigContrastMetalTheme();
+				MetalLookAndFeel.setCurrentTheme(mt);
+				
+				try
+				{
+					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				}
+				catch(Exception e)
+				{
+				}
+			}
+		});
+		
+		theam2.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				MetalTheme mt=new AquaMetalTheme();
+				MetalLookAndFeel.setCurrentTheme(mt);
+				
+				try
+				{
+					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				}
+				catch(Exception e)
+				{
+				}
+			}
+		});
+		
+		theam1.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				MetalTheme mt=new KhakiMetalTheme();
+				MetalLookAndFeel.setCurrentTheme(mt);
+				
+				try
+				{
+					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				}
+				catch(Exception e)
+				{
+				}
+			}
+		});
+			
+		file.add(fileNew);
+		file.add(fileOpen);		
+		file.add(fileSave);
+		file.addSeparator();
+		file.add(imports);
+		file.add(fileClose);
+		
+		edit.add(editUndo);
+		edit.add(editRedo);
+		edit.addSeparator();
+		edit.add(editCut);
+		edit.add(editCopy);
+		edit.add(editPaste);
+		edit.addSeparator();
+		edit.add(editFind);
+		edit.add(editReplace);
+		edit.addSeparator();
+		edit.add(editSelectAll);
+		
+		font.add(fontDialog);
+		font.add(fontWordwrap);
+		
+		LookAndFeelStyle.add(styleMetal);
+		LookAndFeelStyle.add(styleMotif);
+		LookAndFeelStyle.add(styleNimbus);
+		LookAndFeelStyle.add(styleWindows);
+				
+		colorText.add(textColorChange);
+		colorText.add(custom);
+		colorText.add(custom1);
+		
+		theams.add(theam1);
+		theams.add(theam2);
+		theams.add(theam3);
+		theams.add(theam4);
+		theams.add(theam5);
+		theams.add(theam6);
+		theams.add(theam7);
+		theams.add(theam8);
+		theams.add(theam9);
+		
+		menu.add(file);
+		menu.add(edit);
+		menu.add(font);
+		menu.add(LookAndFeelStyle);
+		menu.add(colorText);
+		menu.add(theams);
+		
+		textColorChange.add(redColor); 
+		textColorChange.add(blueColor); 
+		textColorChange.add(yellowColor); 
+				
+		setJMenuBar(menu);
+		
+		JToolBar tool=new JToolBar();
+		JButton newButton=new JButton(null,iconNew);
+		JButton openButton=new JButton(null,iconOpen);
+		JButton saveButton=new JButton(null,iconSave);
+		JButton cutButton=new JButton(null,iconCut);
+		JButton copyButton=new JButton(null,iconCopy);
+		JButton pasteButton=new JButton(null,iconPaste);
+		
+		String toolavailableFont[]=GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+		JLabel toolfontLabel=new JLabel("Font");
+		final JTextField toolvalueFont=new JTextField("Arial");
+		final JComboBox toolfontPane=new JComboBox();
+		
+		for(int i =0; i<toolavailableFont.length;i++)
+			toolfontPane.addItem(toolavailableFont[i]);
+		
+		String toolfontSize[]={"8","10","12","14","16","18","20","22","24","28","32","64"};
+		JLabel toolsizeLabel=new JLabel("fontSize");
+		final JComboBox toolfontPanes=new JComboBox();
+		
+		JButton toolLeft=new JButton(null,iconLeft);
+		JButton toolCenter=new JButton(null,iconCenter);
+		JButton toolRight=new JButton(null,iconRight);
+		toollistFont=new JList(toolavailableFont);
+		
+		for(int i =0; i<toolfontSize.length;i++)
+			toolfontPanes.addItem(toolfontSize[i]);
+					
+		toolfontPanes.addItemListener(new ItemListener()
+		{
+			public void itemStateChanged(ItemEvent event)
+			{
+					String s = toolfontPanes.getSelectedItem().toString();
+					Font f=textArea.getFont();
+					textArea.setFont(new Font(f.getFamily(),f.getStyle(),Integer.valueOf(s)));
+			}
+		});
+		
+		toolfontPane.addItemListener(new ItemListener()
+		{
+			public void itemStateChanged(ItemEvent event)
+			{
+					String s = toolfontPane.getSelectedItem().toString();
+					Font f=textArea.getFont();
+					textArea.setFont(new Font(s,f.getStyle(),f.getSize()));
+			}
+		});
+		
+		toolLeft.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+			}
+		});
+		
+		toolRight.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+			}
+		});
+				
+		
+		newButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.setText("");
+			}
+		});
+		
+		openButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				fileDialog=new JFileChooser();
+				int openChoise= fileDialog.showOpenDialog(MyClass.this);
+				
+				if(openChoise != JFileChooser.APPROVE_OPTION)
+					return;
+					
+				File f=fileDialog.getSelectedFile();
+				if(f.isFile() && f.canRead())
+				{
+					textArea.setText("");
+					setTitle(f.getName());
+					
+					try
+					{
+						BufferedReader br=new BufferedReader(new FileReader(f));
+						String str;
+						
+						while((str=br.readLine())!=null)
+						{
+							textArea.append(str + "\n");
+						}
+					}
+					catch(Exception exp)
+					{
+						textArea.append("File Bot Found");
+					}
+				}
+			}
+		});
+		
+		saveButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				saveFile();
+			}
+		});
+		
+		
+		cutButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.cut();
+			}
+		});
+		
+		copyButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.copy();
+			}
+		});
+		
+		pasteButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.paste();
+			}
+		});
+				
+		tool.add(newButton);
+		tool.add(openButton);
+		tool.add(saveButton);
+		tool.addSeparator();
+		tool.add(cutButton);
+		tool.add(copyButton);
+		tool.add(pasteButton);
+		tool.addSeparator();
+		tool.addSeparator();
+		tool.add(toolfontPane);
+		tool.addSeparator();
+		tool.add(toolfontPanes);
+		tool.addSeparator();
+		tool.addSeparator();
+		tool.add(toolLeft);
+		tool.add(toolCenter);
+		tool.add(toolRight);
+		
+		
+		add(tool,BorderLayout.NORTH);
+		
+		
+		
+		setLocationRelativeTo(null);
+		setVisible(true);
+	}
+	
+	public JPopupMenu createPopupMenu()
+	{
+		JPopupMenu popmenu=new JPopupMenu();
+		JMenuItem popCut=new JMenuItem("Cut");
+		JMenuItem popCopy=new JMenuItem("Copy");
+		JMenuItem popPaste=new JMenuItem("Paste");
+		
+		popCut.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.cut();
+			}
+		});
+		
+		popCopy.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.copy();
+			}
+		});
+		
+		popPaste.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				textArea.paste();
+			}
+		});
+		
+		popmenu.addSeparator();
+		popmenu.add(popCut);
+		popmenu.add(popCopy);
+		popmenu.add(popPaste);
+		popmenu.addSeparator();
+		return popmenu;
+	}
+	
+	private MouseAdapter mouseListener=new MouseAdapter()
+	{
+			JPopupMenu popmenu=createPopupMenu();
+			
+			public void mouseReleased(MouseEvent event)
+			{
+				if(event.isPopupTrigger())
+					popmenu.show(event.getComponent(),event.getX(),event.getY());
+			}
+	};
+	
+	
+	public void saveFile()
+	{
+		saveFile=new JFileChooser();
+		int result=saveFile.showSaveDialog(MyClass.this);
+				 
+		if(result!=JFileChooser.APPROVE_OPTION)
+		{
+			return;
+		}
+				 
+		File f=saveFile.getSelectedFile();
+		try
+		{
+			FileWriter file=new FileWriter(f);
+			textArea.write(file);
+		}
+		catch(Exception exe)
+		{
+			System.out.println("Sorry");
+		}
+	}
+	
+	public void exitApplication()
+	{	
+		
+		if(textArea.getText().equals("")==false)
+		{
+			int result = JOptionPane.showConfirmDialog(MyClass.this,"Save This File .. ","Exit Confermation",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,null);
+			if(result == JOptionPane.YES_OPTION)
+			{
+				saveFile();
+				System.exit(0);
+			}
+			else if(result == JOptionPane.NO_OPTION)
+					System.exit(0);
+			else
+				setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		}
+		else
+		{
+			System.exit(0);
+		}
+	}
+	
+	public void createNewFrame()
+	{	
+		JFrame newFrm=new JFrame();
+		Rectangle r=getBounds();
+		newFrm.setBounds(r.width/2+100,r.height/2-100,450,300);
+		newFrm.setTitle("Find");
+		
+		JLabel findTextLabel=new JLabel("Find What");
+		final JTextField findTextArea=new JTextField(); 
+		
+		JLabel replaceTextLabel=new JLabel("Replace With");
+		final JTextField replaceTextArea=new JTextField(); 
+		
+		JButton finds=new JButton("OK");
+		JButton replaces =new JButton("Replace");
+		
+		findTextLabel.setBounds(10,10,100,120);
+		findTextArea.setBounds(100,55,150,30);
+		
+		replaceTextLabel.setBounds(10,50,100,120);
+		replaceTextArea.setBounds(100,95,150,30);
+		
+		finds.setBounds(300,50,100,30);
+		replaces.setBounds(300,90,100,30);
+
+		finds.addActionListener(new ActionListener() 
+		{
+            public void actionPerformed(ActionEvent e) 
+			{
+				final String find=findTextArea.getText().toLowerCase();
+				textArea.requestFocusInWindow();
+				
+				if(find!=null && find.length()>0)
+				{
+					Document document=textArea.getDocument();
+					int findLength=find.length();	
+					
+					try
+					{		
+						boolean found=false;
+						if(pos+findLength > document.getLength())
+						{
+							pos=0;
+						}
+						while(pos+findLength <= document.getLength())
+						{
+							String match=document.getText(pos,findLength).toLowerCase();
+							if(match.equals(find))
+							{
+								i++;
+								System.out.println(i);
+								found=true;
+								break;
+							}
+							pos++;
+						}
+						if(found)
+						{
+							Rectangle viewRect=textArea.modelToView(pos);
+							textArea.scrollRectToVisible(viewRect);
+							textArea.setCaretPosition(pos+findLength);
+							textArea.moveCaretPosition(pos);
+							pos+=findLength;
+						}
+					}
+					catch(Exception ex)
+					{
+						ex.printStackTrace();
+					}
+				}
+			}
+		});
+		
+		replaces.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				/*final String find=findTextArea.getText().toLowerCase();
+				textArea.requestFocusInWindow();
+				
+				if(find!=null && find.length()>0)
+				{
+					Document document=textArea.getDocument();
+					int findLength=find.length();	
+					
+					try
+					{		
+						boolean found=false;
+						if(pos+findLength > document.getLength())
+						{
+							pos=0;
+						}
+						while(pos+findLength <= document.getLength())
+						{
+							String match=document.getText(pos,findLength).toLowerCase();
+							if(match.equals(find))
+							{
+								if(findTextArea.getText())
+								String from = findTextArea.getText();
+								int start = textArea.getText().indexOf(match);
+								if (start >= 0 && from.length() > 0)
+								textArea.replaceRange(replaceTextArea.getText(), start, start+ from.length());
+								
+								found=true;
+								break;
+							}
+							pos++;
+						}
+						if(found)
+						{
+							Rectangle viewRect=textArea.modelToView(pos);
+							textArea.scrollRectToVisible(viewRect);
+							textArea.setCaretPosition(pos+findLength);
+							textArea.moveCaretPosition(pos);
+							pos+=findLength;
+						}
+					}
+					catch(Exception ex)
+					{
+						ex.printStackTrace();
+					}
+				}*/
+				
+				String from = findTextArea.getText();
+				int start = textArea.getText().indexOf(from);
+				if (start >= 0 && from.length() > 0)
+				textArea.replaceRange(replaceTextArea.getText(), start, start+ from.length());
+			}
+		});
+		
+		JLabel noOfTimes=new JLabel("No Of Times" + " " + i);
+		noOfTimes.setBounds(0,90,300,300);
+		
+		newFrm.add(findTextLabel);
+		newFrm.add(findTextArea);
+		newFrm.add(finds);
+		newFrm.add(replaces);
+		newFrm.add(replaceTextLabel);
+		newFrm.add(replaceTextArea);
+		newFrm.add(noOfTimes);
+		
+		newFrm.setLayout(null);
+		newFrm.setVisible(true);
+	}
+	
+	public static void main(String []arg)
+	{	
+		JFrame frm = new MyClass();
+	}
+}
